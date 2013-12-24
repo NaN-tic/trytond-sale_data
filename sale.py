@@ -93,29 +93,27 @@ class SaleLine:
         line.sale = sale
         line.description = None
         line.party = sale.party
-        values = line.on_change_product()
-        res = {
-            'sale': sale,
-            'type': 'line',
-            'quantity': quantity,
-            'unit': uom,
-            'product': product,
-            'description': product.name,
-            'product_uom_category': product.category or None,
-            'unit_price': values.get('unit_price'),
-            'taxes': [('add', values.get('taxes'))],
-            'note': note,
-            'sequence': 1,
-        }
-        return res
+        vals = line.on_change_product()
+
+        vals['sale'] = sale
+        vals['type'] = 'line'
+        vals['quantity'] = quantity
+        vals['unit'] = uom
+        vals['product'] = product
+        vals['description'] = product.name
+        vals['product_uom_category'] = product.category or None
+        vals['taxes'] = [('add', vals.get('taxes'))]
+        vals['note'] = note
+        vals['sequence'] = 1
+        return vals
 
     @classmethod
-    def get_sale_line_product(self, party, product, qty=1, desc=None):
+    def get_sale_line_product(self, party, product, quantity=1, desc=None):
         """
         Get Product values
         :param party: the BrowseRecord of the party
         :param product: the BrowseRecord of the product
-        :param qty: Int quantity
+        :param quantity: Int quantity
         :param desc: Str line
         :return: dict product values
         """
@@ -128,22 +126,19 @@ class SaleLine:
         sale.currency = sale.default_currency()
 
         line = SaleLine()
-        line.quantity = qty
+        line.quantity = quantity
         line.sale = sale
         line.product = product
         line.description = desc or product.name
         line.unit = product.default_uom
-        values = line.on_change_product()
+        vals = line.on_change_product()
 
-        vals = {
-            'type': 'line',
-            'quantity': qty,
-            'unit': product.default_uom,
-            'product': product,
-            'description': desc or product.name,
-            'product_uom_category': product.category or None,
-            'unit_price': values.get('unit_price'),
-            'taxes': [('add', values.get('taxes'))],
-            'sequence': 1,
-            }
+        vals['type'] = 'line'
+        vals['quantity'] = quantity
+        vals['unit'] = uom
+        vals['product'] = product
+        vals['description'] = desc or product.name
+        vals['product_uom_category'] = product.category or None
+        vals['taxes'] = [('add', vals.get('taxes'))]
+        vals['sequence'] = 1
         return vals
