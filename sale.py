@@ -25,30 +25,36 @@ class Sale:
         :param party: the BrowseRecord of the party
         :return: a dict values
         '''
-        PaymentTerm = Pool().get('account.invoice.payment_term')
+        pool = Pool()
+        Sale = pool.get('sale.sale')
+        PaymentTerm = pool.get('account.invoice.payment_term')
 
-        payment_terms = PaymentTerm.search([], limit=1)
-        if not payment_terms:
-            self.raise_user_error('missing_payment_term',
-                error_args=(party.name, party))
-        payment_term, = payment_terms
+        company_context = Transaction().context.get('company')
+        company = Pool().get('company.company')(company_context)
 
-        invoice_address = party.address_get(type='invoice')
-        shipment_address = party.address_get(type='delivery')
+        values = {'party': party}
+        vals = Sale(**values).on_change_party()
 
-        company = Transaction().context.get('company')
-        company = Pool().get('company.company')(company)
+        vals['party'] = party
 
-        res = {
-            'company': company,
-            'party': party,
-            'invoice_address': invoice_address and invoice_address or None,
-            'shipment_address': shipment_address and shipment_address or None,
-            'currency': company.currency,
-            'payment_term': party.customer_payment_term or payment_term,
-            'description': description,
-        }
-        return res
+        if description:
+            vals['description'] = description
+
+        if not 'payment_term' in vals:
+            payment_terms = PaymentTerm.search([], limit=1)
+            if not payment_terms:
+                self.raise_user_error('missing_payment_term',
+                    error_args=(party.name, party))
+            payment_term, = payment_terms
+            vals['payment_term'] = party.customer_payment_term or payment_term
+
+        if not 'company' in vals:
+            vals['company'] = company
+
+        if not 'currency' in vals:
+            vals['currency'] = company.currency
+
+        return vals
 
 
 class SaleLine:
