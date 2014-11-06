@@ -19,24 +19,21 @@ class Sale:
             })
 
     @classmethod
-    def get_sale_data(self, party, description=None):
+    def get_sale_data(cls, party, description=None):
         '''
         Return sale object from party
         :param party: the BrowseRecord of the party
         :return: object
         '''
         pool = Pool()
-        Sale = pool.get('sale.sale')
         PaymentTerm = pool.get('account.invoice.payment_term')
 
-        company_context = Transaction().context.get('company')
-        company = Pool().get('company.company')(company_context)
-
-        sale = Sale()
+        sale = cls()
+        default_values = cls.default_get(cls._fields.keys())
+        for key in default_values:
+            if 'rec_name' not in key:
+                setattr(sale, key, default_values[key])
         sale.party = party
-        sale.company = company
-        sale.currency = company.currency
-        
         for key, value in sale.on_change_party().iteritems():
             setattr(sale, key, value)
 
@@ -46,7 +43,7 @@ class Sale:
         if not sale.payment_term:
             payment_terms = PaymentTerm.search([], limit=1)
             if not payment_terms:
-                self.raise_user_error('missing_payment_term',
+                cls.raise_user_error('missing_payment_term',
                     error_args=(party.name, party))
             payment_term, = payment_terms
             sale.payment_term = party.customer_payment_term or payment_term
