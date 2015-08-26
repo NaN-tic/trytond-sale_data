@@ -2,7 +2,6 @@
 # The COPYRIGHT file at the top level of this repository contains
 # the full copyright notices and license terms.
 from trytond.pool import Pool, PoolMeta
-from trytond.transaction import Transaction
 
 __all__ = ['Sale', 'SaleLine']
 __metaclass__ = PoolMeta
@@ -34,8 +33,7 @@ class Sale:
             if 'rec_name' not in key:
                 setattr(sale, key, default_values[key])
         sale.party = party
-        for key, value in sale.on_change_party().iteritems():
-            setattr(sale, key, value)
+        sale.on_change_party()
 
         if description:
             sale.description = description
@@ -44,10 +42,9 @@ class Sale:
             payment_terms = PaymentTerm.search([], limit=1)
             if not payment_terms:
                 cls.raise_user_error('missing_payment_term',
-                    error_args=(party.name, party))
+                    error_args=(party.rec_name, party.id))
             payment_term, = payment_terms
             sale.payment_term = party.customer_payment_term or payment_term
-
         return sale
 
 
@@ -62,42 +59,31 @@ class SaleLine:
             })
 
     @classmethod
-    def get_sale_line_data(self, sale, product, quantity, uom='u', note=None):
+    def get_sale_line_data(cls, sale, product, quantity, note=None):
         '''
         Return sale line object from sale and product
         :param sale: the BrowseRecord of the invoice
         :param product: the BrowseRecord of the product
         :param quantity: the float of the quantity
-        :param uom: str of the unit of mesure
         :param note: the str of the note line
         :return: object
         '''
-        SaleLine = Pool().get('sale.line')
-        ProductUom = Pool().get('product.uom')
+        Line = Pool().get('sale.line')
 
-        uoms = ProductUom.search(['symbol', '=', uom], limit=1)
-        if not uoms:
-            self.raise_user_error('missing_product_uom', error_args=(uom))
-        uom = uoms[0]
-
-        line = SaleLine()
+        line = Line()
         line.sale = sale
-        line.unit = uom
         line.quantity = quantity
         line.product = product
-        line.description = product.rec_name
         line.party = sale.party
         line.type = 'line'
-        line.note = note
         line.sequence = 1
-
-        for key, value in line.on_change_product().iteritems():
-            setattr(line, key, value)
-
+        line.on_change_product()
+        if note:
+            line.note = note
         return line
 
     @classmethod
-    def get_sale_line_product(self, party, product, quantity=1, desc=None):
+    def get_sale_line_product(cls, party, product, quantity=1, desc=None):
         """
         Get Product object from party and product
         :param party: the BrowseRecord of the party
@@ -108,23 +94,20 @@ class SaleLine:
         """
         pool = Pool()
         Sale = pool.get('sale.sale')
-        SaleLine = pool.get('sale.line')
+        Line = pool.get('sale.line')
 
         sale = Sale()
         sale.party = party
         sale.currency = sale.default_currency()
 
-        line = SaleLine()
+        line = Line()
         line.quantity = quantity
         line.sale = sale
         line.product = product
-        line.description = desc or product.rec_name
         line.unit = product.default_uom
         line.type = 'line'
-        line.note = note
         line.sequence = 1
-
-        for key, value in line.on_change_product().iteritems():
-            setattr(line, key, value)
-
+        line.on_change_product()
+        if desc:
+            line.description = desc
         return line
