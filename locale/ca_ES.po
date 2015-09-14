@@ -3,7 +3,7 @@ msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
 
 msgctxt "error:sale.line:"
-msgid "Not available Uom \"%s\""
+msgid "Not available Product Uom \"%s\""
 msgstr "No se troba la Udm \"%s\"."
 
 msgctxt "error:sale.sale:"
