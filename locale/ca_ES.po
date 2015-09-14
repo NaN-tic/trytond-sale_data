@@ -1,0 +1,11 @@
+# 
+msgid ""
+msgstr "Content-Type: text/plain; charset=utf-8\n"
+
+msgctxt "error:sale.line:"
+msgid "Not available Uom \"%s\""
+msgstr "No se troba la Udm \"%s\"."
+
+msgctxt "error:sale.sale:"
+msgid "Party \"%s\" (%s) must be a Payment term!"
+msgstr "El tercer \"%s\" (%s) ha de tenir un termini de pagament."

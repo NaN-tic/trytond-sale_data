@@ -55,7 +55,7 @@ class SaleLine:
     def __setup__(cls):
         super(SaleLine, cls).__setup__()
         cls._error_messages.update({
-            'missing_product_uom': 'Not available Product Uom "%s"',
+            'missing_product_uom': 'Not available Uom "%s"',
             })
 
     @classmethod
