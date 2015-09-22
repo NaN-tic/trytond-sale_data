@@ -28,10 +28,10 @@ class Sale:
         PaymentTerm = pool.get('account.invoice.payment_term')
 
         sale = cls()
-        default_values = cls.default_get(cls._fields.keys())
+        default_values = cls.default_get(cls._fields.keys(),
+                with_rec_name=False)
         for key in default_values:
-            if 'rec_name' not in key:
-                setattr(sale, key, default_values[key])
+            setattr(sale, key, default_values[key])
         sale.party = party
         sale.on_change_party()
 
