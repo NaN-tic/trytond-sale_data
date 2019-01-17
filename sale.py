@@ -2,19 +2,14 @@
 # The COPYRIGHT file at the top level of this repository contains
 # the full copyright notices and license terms.
 from trytond.pool import Pool, PoolMeta
+from trytond.i18n import gettext
+from trytond.exceptions import UserError
 
 __all__ = ['Sale', 'SaleLine']
 
 
 class Sale(metaclass=PoolMeta):
     __name__ = 'sale.sale'
-
-    @classmethod
-    def __setup__(cls):
-        super(Sale, cls).__setup__()
-        cls._error_messages.update({
-            'missing_payment_term': 'Party "%s" (%s) must be a Payment term!',
-            })
 
     @classmethod
     def get_sale_data(cls, party, description=None):
@@ -40,8 +35,9 @@ class Sale(metaclass=PoolMeta):
         if not sale.payment_term:
             payment_terms = PaymentTerm.search([], limit=1)
             if not payment_terms:
-                cls.raise_user_error('missing_payment_term',
-                    error_args=(party.rec_name, party.id))
+                raise UserError(gettext(
+                    'sale_data.missing_payment_term',
+                    party=party.rec_name, party_id=party.id))
             payment_term, = payment_terms
             sale.payment_term = party.customer_payment_term or payment_term
         return sale
@@ -49,13 +45,6 @@ class Sale(metaclass=PoolMeta):
 
 class SaleLine(metaclass=PoolMeta):
     __name__ = 'sale.line'
-
-    @classmethod
-    def __setup__(cls):
-        super(SaleLine, cls).__setup__()
-        cls._error_messages.update({
-            'missing_product_uom': 'Not available Uom "%s"',
-            })
 
     @classmethod
     def get_sale_line_data(cls, sale, product, quantity, note=None):
