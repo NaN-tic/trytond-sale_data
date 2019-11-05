@@ -62,7 +62,6 @@ class SaleLine(metaclass=PoolMeta):
         line.sale = sale
         line.quantity = quantity
         line.product = product
-        line.party = sale.party
         line.type = 'line'
         if hasattr(line, 'party'):
             line.party = sale.party
