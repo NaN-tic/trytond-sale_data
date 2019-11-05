@@ -62,7 +62,6 @@ class SaleLine(metaclass=PoolMeta):
         line.sale = sale
         line.quantity = quantity
         line.product = product
-        line.party = sale.party
         line.type = 'line'
         line.sequence = 1
         line.on_change_product()
