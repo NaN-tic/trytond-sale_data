@@ -64,6 +64,8 @@ class SaleLine(metaclass=PoolMeta):
         line.product = product
         line.party = sale.party
         line.type = 'line'
+        if hasattr(line, 'party'):
+            line.party = sale.party
         line.sequence = 1
         line.on_change_product()
         if note:
