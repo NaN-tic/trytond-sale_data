@@ -22,8 +22,10 @@ class Sale(metaclass=PoolMeta):
         PaymentTerm = pool.get('account.invoice.payment_term')
 
         sale = cls()
-        default_values = cls.default_get(cls._fields.keys(),
-                with_rec_name=False)
+        default_values = cls.default_get([
+                name for name, field in cls._fields.items()
+                if not field.readonly
+                ], with_rec_name=False)
         for key in default_values:
             setattr(sale, key, default_values[key])
         sale.party = party
